@@ -1,0 +1,21 @@
+# build output
+dist/
+.output/
+
+# dependencies
+node_modules
+node_modules/
+node_modules.nosync/
+
+# generated types
+.astro/
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# netlify
+.netlify/
