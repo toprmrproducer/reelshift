@@ -1,0 +1,16 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+	title="Page Not Found — ReelShift"
+	description="This page could not be found."
+	canonicalPath="/404"
+>
+	<div class="py-24 text-center">
+		<h1 class="font-display text-4xl font-semibold text-[#2B2013]">404</h1>
+		<p class="mt-4 text-[#5C4F3D]">
+			That page doesn't exist. <a href={import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`} class="font-medium text-[#C9982E] underline hover:text-[#B8860B]">Back to the homepage</a>.
+		</p>
+	</div>
+</Layout>

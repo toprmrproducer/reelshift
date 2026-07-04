@@ -1,0 +1,48 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const faqs = [
+	{
+		q: 'Is ReelShift really free?',
+		a: 'Yes. Every conversion runs on your own device, so there is no server cost per file and no reason to charge or limit usage.',
+	},
+	{
+		q: 'Are my files uploaded anywhere?',
+		a: 'No. Files are processed locally in your browser using WebAssembly. They never leave your device.',
+	},
+	{
+		q: 'What file formats are supported?',
+		a: 'ReelShift converts any browser-playable video into MP4 (H.264), WebM, an animated GIF, or MP3 audio extracted from the soundtrack.',
+	},
+	{
+		q: 'Why is the first conversion slow?',
+		a: 'ReelShift downloads a small WebAssembly conversion engine the first time you use it on a visit. After that, conversions start instantly.',
+	},
+	{
+		q: 'Is there a file size limit?',
+		a: 'There is no artificial limit, but very large files or exotic codecs may take longer or fail depending on your device\'s available memory.',
+	},
+];
+---
+
+<Layout
+	title="FAQ — ReelShift"
+	description="Frequently asked questions about ReelShift's free, private, browser-based video converter."
+	canonicalPath="/faq"
+>
+	<div class="mx-auto max-w-2xl">
+		<h1 class="font-display text-3xl font-semibold tracking-tight text-[#2B2013]">
+			Frequently Asked Questions
+		</h1>
+		<div class="mt-8 space-y-8">
+			{
+				faqs.map((item) => (
+					<div class="rounded-xl border border-[#E8DFC8] bg-white p-5">
+						<h2 class="font-display text-lg font-semibold text-[#2B2013]">{item.q}</h2>
+						<p class="mt-2 text-[#5C4F3D]">{item.a}</p>
+					</div>
+				))
+			}
+		</div>
+	</div>
+</Layout>

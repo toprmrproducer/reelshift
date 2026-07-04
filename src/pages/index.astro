@@ -1,0 +1,479 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+---
+
+<Layout
+	title="ReelShift — Convert Video Files, Privately, In Your Browser"
+	description="Convert video between MP4, WebM, GIF, and MP3 entirely on your device. No uploads, no accounts, nothing ever leaves your computer."
+	canonicalPath="/"
+>
+	<section class="mx-auto max-w-3xl text-center">
+		<p class="font-display text-sm font-semibold uppercase tracking-[0.2em] text-[#C9982E]">
+			Private video conversion
+		</p>
+		<h1 class="mt-4 font-display text-4xl font-semibold tracking-tight text-[#2B2013] sm:text-5xl">
+			Convert video files, without uploading anything.
+		</h1>
+		<p class="mx-auto mt-5 max-w-xl text-base leading-relaxed text-[#5C4F3D]">
+			ReelShift converts between <strong class="text-[#2B2013]">MP4</strong>, <strong class="text-[#2B2013]">WebM</strong>, <strong class="text-[#2B2013]">GIF</strong>, and extracts <strong class="text-[#2B2013]">MP3</strong> audio — entirely inside your
+			browser. A real build of FFmpeg runs on WebAssembly, right on your
+			device. Nothing you select is ever sent anywhere.
+		</p>
+	</section>
+
+	<section class="mx-auto mt-12 max-w-3xl">
+		<div class="rounded-2xl border border-[#E8DFC8] bg-white p-6 shadow-[0_1px_2px_rgba(43,32,19,0.04),0_8px_24px_rgba(43,32,19,0.06)] sm:p-8">
+			<div class="grid gap-6 sm:grid-cols-2">
+				<div>
+					<label
+						for="file-input"
+						class="mb-2 block text-sm font-medium text-[#2B2013]"
+					>
+						Choose video files
+					</label>
+					<input
+						id="file-input"
+						type="file"
+						accept="video/*"
+						multiple
+						class="block w-full cursor-pointer rounded-xl border border-[#E8DFC8] bg-[#FAF6EC] text-sm text-[#5C4F3D] file:mr-4 file:cursor-pointer file:rounded-lg file:border-0 file:bg-[#C9982E] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-[#B8860B]"
+					/>
+					<p class="mt-1.5 text-xs text-[#8A7B62]">
+						You can select more than one file — they'll be converted one
+						after another.
+					</p>
+				</div>
+
+				<div>
+					<label
+						for="format-select"
+						class="mb-2 block text-sm font-medium text-[#2B2013]"
+					>
+						Convert to
+					</label>
+					<select
+						id="format-select"
+						class="block w-full rounded-xl border border-[#E8DFC8] bg-white px-4 py-2.5 text-sm text-[#2B2013] focus:border-[#C9982E] focus:outline-none"
+					>
+						<option value="mp4">MP4 (H.264)</option>
+						<option value="webm">WebM</option>
+						<option value="gif">GIF (animated)</option>
+						<option value="mp3">MP3 (audio only)</option>
+					</select>
+					<p class="mt-1.5 text-xs text-[#8A7B62]">
+						The whole batch converts to this one format.
+					</p>
+				</div>
+			</div>
+
+			<button
+				id="convert-btn"
+				type="button"
+				disabled
+				class="mt-6 w-full rounded-xl bg-[#C9982E] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#B8860B] disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
+			>
+				Convert
+			</button>
+
+			<div id="engine-status-wrap" class="mt-6 hidden">
+				<div class="flex items-center justify-between text-sm">
+					<span id="engine-status-text" class="text-[#5C4F3D]">Idle</span>
+					<span id="engine-status-percent" class="text-[#8A7B62]">0%</span>
+				</div>
+				<div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-[#F1EADA]">
+					<div
+						id="engine-progress-bar"
+						class="h-full w-0 rounded-full bg-[#C9982E] transition-all duration-150"
+					>
+					</div>
+				</div>
+			</div>
+
+			<div
+				id="error-box"
+				class="mt-6 hidden rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+			>
+			</div>
+
+			<!-- Per-file queue cards -->
+			<div id="queue-list" class="mt-6 flex flex-col gap-3"></div>
+		</div>
+
+		<div class="mt-8 rounded-2xl border border-[#E8DFC8] bg-white/60 p-6 text-sm text-[#5C4F3D]">
+			<p>
+				<strong class="text-[#2B2013]">Supported conversions:</strong>
+				any browser-playable video source can be converted to MP4 (H.264 video,
+				AAC-compatible container), WebM, an animated GIF (downscaled to 480px
+				wide at 10fps for a reasonable file size), or MP3 audio extracted from
+				the video's soundtrack. The first time you convert something, your
+				browser downloads a small (~30MB) conversion engine and caches it —
+				every conversion after that starts instantly. Very large files or
+				exotic codecs may take longer or fail depending on your device's
+				memory. Files in a batch are converted one at a time, in order, so
+				memory use stays bounded regardless of queue size.
+			</p>
+		</div>
+
+		<div class="mt-6 flex flex-wrap justify-center gap-6 text-sm font-medium text-[#5C4F3D]">
+			<a href={`${base}about`} class="underline decoration-[#E8DFC8] underline-offset-4 transition hover:text-[#B8860B]">
+				About ReelShift
+			</a>
+			<a href={`${base}faq`} class="underline decoration-[#E8DFC8] underline-offset-4 transition hover:text-[#B8860B]">
+				Frequently Asked Questions
+			</a>
+			<a href={`${base}privacy`} class="underline decoration-[#E8DFC8] underline-offset-4 transition hover:text-[#B8860B]">
+				Privacy Policy
+			</a>
+		</div>
+	</section>
+
+	<script>
+		type QueueItem = {
+			id: string;
+			file: File;
+		};
+
+		const fileInput = document.getElementById(
+			'file-input',
+		) as HTMLInputElement;
+		const formatSelect = document.getElementById(
+			'format-select',
+		) as HTMLSelectElement;
+		const convertBtn = document.getElementById(
+			'convert-btn',
+		) as HTMLButtonElement;
+		const engineStatusWrap = document.getElementById(
+			'engine-status-wrap',
+		) as HTMLDivElement;
+		const engineStatusText = document.getElementById(
+			'engine-status-text',
+		) as HTMLSpanElement;
+		const engineStatusPercent = document.getElementById(
+			'engine-status-percent',
+		) as HTMLSpanElement;
+		const engineProgressBar = document.getElementById(
+			'engine-progress-bar',
+		) as HTMLDivElement;
+		const errorBox = document.getElementById('error-box') as HTMLDivElement;
+		const queueList = document.getElementById('queue-list') as HTMLDivElement;
+
+		/** @type {import('@ffmpeg/ffmpeg').FFmpeg | null} */
+		let ffmpeg: any = null;
+		let ffmpegLoaded = false;
+		let queue: QueueItem[] = [];
+		let currentCard: HTMLDivElement | null = null;
+
+		function showEngineStatus(text: string, percent?: number) {
+			engineStatusWrap.classList.remove('hidden');
+			engineStatusText.textContent = text;
+			if (typeof percent === 'number') {
+				const clamped = Math.max(0, Math.min(100, Math.round(percent)));
+				engineStatusPercent.textContent = `${clamped}%`;
+				engineProgressBar.style.width = `${clamped}%`;
+			}
+		}
+
+		function hideEngineStatus() {
+			engineStatusWrap.classList.add('hidden');
+			engineProgressBar.style.width = '0%';
+			engineStatusPercent.textContent = '0%';
+		}
+
+		function showError(message: string) {
+			errorBox.classList.remove('hidden');
+			errorBox.textContent = message;
+		}
+
+		function clearError() {
+			errorBox.classList.add('hidden');
+			errorBox.textContent = '';
+		}
+
+		// Any user-controlled text (filenames, etc.) rendered via innerHTML MUST
+		// go through this helper first.
+		const escapeHtml = (str: string): string =>
+			str
+				.replace(/&/g, '&amp;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;')
+				.replace(/"/g, '&quot;')
+				.replace(/'/g, '&#39;');
+
+		function renderQueueButtonState() {
+			convertBtn.disabled = queue.length === 0;
+		}
+
+		function addFiles(files: FileList | File[]) {
+			const incoming = Array.from(files).filter((f) =>
+				f.type.startsWith('video/'),
+			);
+			for (const file of incoming) {
+				queue.push({
+					id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+					file,
+				});
+			}
+			renderQueueButtonState();
+		}
+
+		fileInput.addEventListener('change', () => {
+			clearError();
+			if (fileInput.files && fileInput.files.length > 0) {
+				addFiles(fileInput.files);
+			}
+		});
+
+		function createQueueCard(item: QueueItem): HTMLDivElement {
+			const card = document.createElement('div');
+			card.className = 'rounded-xl border border-[#E8DFC8] bg-white p-4';
+			card.id = `card-${item.id}`;
+			card.innerHTML = `
+				<div class="flex items-center justify-between gap-4">
+					<p class="min-w-0 flex-1 truncate text-sm font-medium text-[#2B2013]">${escapeHtml(item.file.name)}</p>
+					<span class="status-text shrink-0 text-xs text-[#8A7B62]">Waiting…</span>
+				</div>
+				<div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#F1EADA]">
+					<div class="progress-bar h-full w-0 rounded-full bg-[#C9982E] transition-all duration-150"></div>
+				</div>
+				<div class="action-slot mt-3"></div>
+			`;
+			return card;
+		}
+
+		function setCardStatus(
+			card: HTMLDivElement,
+			text: string,
+			isError = false,
+		) {
+			const statusEl = card.querySelector('.status-text');
+			if (statusEl) {
+				statusEl.textContent = text;
+				statusEl.className = isError
+					? 'status-text shrink-0 text-xs text-red-600'
+					: 'status-text shrink-0 text-xs text-[#8A7B62]';
+			}
+		}
+
+		function setCardProgress(card: HTMLDivElement, percent: number) {
+			const bar = card.querySelector('.progress-bar') as HTMLDivElement | null;
+			if (bar) {
+				const clamped = Math.max(0, Math.min(100, Math.round(percent)));
+				bar.style.width = `${clamped}%`;
+			}
+		}
+
+		function setCardAction(
+			card: HTMLDivElement,
+			url: string,
+			filename: string,
+		) {
+			const slot = card.querySelector('.action-slot');
+			if (slot) {
+				const link = document.createElement('a');
+				link.href = url;
+				link.download = filename;
+				link.textContent = 'Download file';
+				link.className =
+					'inline-flex items-center gap-2 rounded-xl bg-[#C9982E] px-5 py-2 text-xs font-semibold text-white transition hover:bg-[#B8860B]';
+				slot.innerHTML = '';
+				slot.appendChild(link);
+			}
+		}
+
+		async function getFfmpeg() {
+			if (ffmpeg && ffmpegLoaded) return ffmpeg;
+
+			const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+			const { toBlobURL } = await import('@ffmpeg/util');
+
+			ffmpeg = new FFmpeg();
+
+			ffmpeg.on('progress', ({ progress }: { progress: number }) => {
+				if (typeof progress === 'number' && !Number.isNaN(progress)) {
+					const percent = progress * 100;
+					showEngineStatus('Converting…', percent);
+					if (currentCard) {
+						setCardProgress(currentCard, percent);
+						setCardStatus(currentCard, `Converting… ${Math.round(Math.max(0, Math.min(100, percent)))}%`);
+					}
+				}
+			});
+
+			ffmpeg.on('log', ({ message }: { message: string }) => {
+				// Useful for debugging in the console; not shown to the user.
+				console.debug('[ffmpeg]', message);
+			});
+
+			showEngineStatus('Loading converter engine…', 0);
+
+			const coreVersion = '0.12.10';
+			const baseURL = `https://unpkg.com/@ffmpeg/core@${coreVersion}/dist/esm`;
+
+			const [coreURL, wasmURL] = await Promise.all([
+				toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+				toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+			]);
+
+			await ffmpeg.load({ coreURL, wasmURL });
+
+			ffmpegLoaded = true;
+			return ffmpeg;
+		}
+
+		function extensionOf(name: string): string {
+			const parts = name.split('.');
+			return parts.length > 1 ? (parts.pop() as string).toLowerCase() : 'bin';
+		}
+
+		function buildCommand(
+			inputName: string,
+			outputName: string,
+			format: string,
+		): string[] {
+			switch (format) {
+				case 'mp4':
+					return [
+						'-i',
+						inputName,
+						'-c:v',
+						'libx264',
+						'-preset',
+						'ultrafast',
+						'-pix_fmt',
+						'yuv420p',
+						outputName,
+					];
+				case 'webm':
+					return ['-i', inputName, outputName];
+				case 'gif':
+					return [
+						'-i',
+						inputName,
+						'-vf',
+						'fps=10,scale=480:-1:flags=lanczos',
+						outputName,
+					];
+				case 'mp3':
+					return ['-i', inputName, '-vn', '-acodec', 'libmp3lame', outputName];
+				default:
+					throw new Error(`Unsupported format: ${format}`);
+			}
+		}
+
+		function mimeTypeFor(format: string): string {
+			switch (format) {
+				case 'mp4':
+					return 'video/mp4';
+				case 'webm':
+					return 'video/webm';
+				case 'gif':
+					return 'image/gif';
+				case 'mp3':
+					return 'audio/mpeg';
+				default:
+					return 'application/octet-stream';
+			}
+		}
+
+		async function convertOne(item: QueueItem, format: string): Promise<void> {
+			const card = document.getElementById(
+				`card-${item.id}`,
+			) as HTMLDivElement | null;
+			if (!card) return;
+
+			currentCard = card;
+			setCardStatus(card, 'Preparing…');
+
+			const inputExt = extensionOf(item.file.name) || 'mp4';
+			const inputName = `input-${item.id}.${inputExt}`;
+			const outputName = `output-${item.id}.${format}`;
+
+			try {
+				const engine = await getFfmpeg();
+				const { fetchFile } = await import('@ffmpeg/util');
+
+				setCardStatus(card, 'Preparing file…');
+				const data = await fetchFile(item.file);
+				await engine.writeFile(inputName, data);
+
+				setCardStatus(card, 'Converting…');
+				await engine.exec(buildCommand(inputName, outputName, format));
+
+				const outputData = await engine.readFile(outputName);
+				const blob = new Blob([outputData.buffer], {
+					type: mimeTypeFor(format),
+				});
+				const url = URL.createObjectURL(blob);
+
+				const baseName = item.file.name.replace(/\.[^/.]+$/, '') || 'converted';
+				const filename = `${baseName}.${format}`;
+
+				setCardProgress(card, 100);
+				setCardStatus(card, `Done — ${(blob.size / 1024 / 1024).toFixed(2)} MB`);
+				setCardAction(card, url, filename);
+
+				try {
+					await engine.deleteFile(inputName);
+				} catch {
+					// ignore if already gone
+				}
+				try {
+					await engine.deleteFile(outputName);
+				} catch {
+					// ignore if already gone
+				}
+			} catch (err) {
+				console.error(err);
+				const message =
+					err instanceof Error ? err.message : 'Something went wrong during conversion.';
+				setCardStatus(
+					card,
+					`Error: ${message}. File may be corrupt, use an unsupported codec, or be too large for available memory.`,
+					true,
+				);
+			} finally {
+				currentCard = null;
+			}
+		}
+
+		convertBtn.addEventListener('click', async () => {
+			if (queue.length === 0) return;
+
+			clearError();
+			convertBtn.disabled = true;
+			fileInput.disabled = true;
+			formatSelect.disabled = true;
+			queueList.innerHTML = '';
+
+			const format = formatSelect.value;
+
+			const cards: HTMLDivElement[] = [];
+			for (const item of queue) {
+				const card = createQueueCard(item);
+				queueList.appendChild(card);
+				cards.push(card);
+			}
+
+			try {
+				// Process sequentially — ffmpeg.wasm runs one job at a time.
+				for (const item of queue) {
+					await convertOne(item, format);
+				}
+				showEngineStatus('All conversions done', 100);
+			} catch (err) {
+				console.error(err);
+				showError(
+					'Something went wrong loading the conversion engine. Try reloading the page.',
+				);
+				hideEngineStatus();
+			} finally {
+				convertBtn.disabled = queue.length === 0;
+				fileInput.disabled = false;
+				formatSelect.disabled = false;
+			}
+		});
+	</script>
+</Layout>

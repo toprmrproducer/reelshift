@@ -1,0 +1,34 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+	title="About — ReelShift"
+	description="ReelShift is a free, browser-based video converter. Learn how it works and why it's free."
+	canonicalPath="/about"
+>
+	<div class="mx-auto max-w-2xl">
+		<h1 class="font-display text-3xl font-semibold tracking-tight text-[#2B2013]">
+			About ReelShift
+		</h1>
+		<div class="mt-6 space-y-4 text-[#5C4F3D]">
+			<p>
+				ReelShift is a single-purpose tool for converting video files between
+				MP4, WebM, GIF, and MP3 — entirely inside your web browser, using a
+				real build of FFmpeg compiled to WebAssembly. No file you select is
+				ever uploaded to a server.
+			</p>
+			<p>
+				Because there is no server-side processing, ReelShift can stay
+				completely free with no account, no watermark, and no file-size
+				games. The site is supported by on-page advertising.
+			</p>
+			<p>
+				Larger files can take longer to convert on older devices, since the
+				work happens on your own hardware rather than in the cloud. The first
+				conversion on a given visit downloads a small (~30MB) engine that is
+				then cached by your browser for every conversion after that.
+			</p>
+		</div>
+	</div>
+</Layout>
